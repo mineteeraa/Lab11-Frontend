@@ -12,6 +12,9 @@ import NProgress from 'nprogress'
 import EventService from '@/services/EventService.js'
 import GStore from '@/store'
 import OrganizerService from '@/services/OrganizerService.js'
+import AddOrganizer from '@/views/OrganizerForm.vue'
+import OrganizerLayout from '@/views/organizer/Layout.vue'
+import OrganizerDetails from '@/views/organizer/Details.vue'
 
 const routes = [
   {
@@ -39,6 +42,11 @@ const routes = [
           console.log('cannot load organizer')
         })
     }
+  },
+  {
+    path: '/add-organizer',
+    name: 'AddOrganizer',
+    component: AddOrganizer
   },
   {
     path: '/event/:id',
@@ -80,6 +88,37 @@ const routes = [
         name: 'EventEdit',
         props: true,
         component: EventEdit
+      }
+    ]
+  },
+  {
+    path: '/organizer/:id',
+    name: 'OrganizerLayout',
+    props: true,
+    component: OrganizerLayout,
+    beforeEnter: (to) => {
+      return OrganizerService.getOrganizer(to.params.id) // Return and params.id
+        .then((response) => {
+          // Still need to set the data here
+          GStore.organizer = response.data // <--- Store the organizer
+        })
+        .catch((error) => {
+          if (error.response && error.response.status == 404) {
+            return {
+              // <--- Return
+              name: '404Resource',
+              params: { resource: 'organizer' }
+            }
+          } else {
+            return { name: 'NetworkError' } // <--- Return
+          }
+        })
+    },
+    children: [
+      {
+        path: '',
+        name: 'OrganizerDetails',
+        component: OrganizerDetails
       }
     ]
   },
